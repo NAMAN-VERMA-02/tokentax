@@ -19,8 +19,6 @@ classifiers = [
 dependencies = [
     "tiktoken>=0.7",
     "tokenizers>=0.19",
-    "transformers>=4.40",
-    "huggingface_hub>=0.23",
     "indic-transliteration>=2.3",
 ]
 
