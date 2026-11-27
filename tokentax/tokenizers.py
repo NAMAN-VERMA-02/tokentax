@@ -22,6 +22,7 @@ class Tokenizer:
     name: str
     vocab_size: int
     encode: Callable[[str], list[int]]
+    unk_id: int | None = None  # id of the "unknown" token; None if the tokenizer can't lose text (byte-level)
 
 
 @lru_cache(maxsize=None)
@@ -40,5 +41,7 @@ def get(name: str) -> Tokenizer:
 
         tok = HFTokenizer.from_pretrained(ident)  # fetches tokenizer.json only, no weights
         # no BOS/CLS/SEP: we count the text, not the model's wrapper tokens
-        return Tokenizer(name, tok.get_vocab_size(), lambda s: tok.encode(s, add_special_tokens=False).ids)
+        unk = getattr(tok.model, "unk_token", None)
+        unk_id = tok.token_to_id(unk) if unk else None
+        return Tokenizer(name, tok.get_vocab_size(), lambda s: tok.encode(s, add_special_tokens=False).ids, unk_id)
     raise ValueError(f"unknown tokenizer kind {kind!r}")

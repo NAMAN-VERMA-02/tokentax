@@ -18,6 +18,14 @@ def token_counts(encode, sentences: list[str]) -> list[int]:
     return [len(encode(s)) for s in sentences]
 
 
+def unk_rate(encode, unk_id, sentences: list[str]) -> float:
+    """Share of tokens that are "unknown". A low tax with a high unk rate means text was thrown away, not saved."""
+    if unk_id is None:
+        return 0.0
+    ids = [i for s in sentences for i in encode(s)]
+    return sum(i == unk_id for i in ids) / len(ids) if ids else 0.0
+
+
 def tax(lang_counts: list[int], base_counts: list[int]) -> float:
     """Total tokens in the language / total tokens for the same sentences in the baseline."""
     if len(lang_counts) != len(base_counts):
@@ -69,6 +77,7 @@ def run(out: Path, tokenizer_names=None, languages=None) -> list[dict]:
                 "tax": round(tax(counts, base), 4),
                 "ci_low": round(lo, 4),
                 "ci_high": round(hi, 4),
+                "unk_rate": round(unk_rate(tok.encode, tok.unk_id, texts[lang]), 4),
                 "byte_premium": round(utf8_bytes(texts[lang]) / base_bytes, 4),
                 "chars_per_token": round(sum(map(len, texts[lang])) / sum(counts), 3),
                 "sentences_in_128k": int(CONTEXT / (sum(counts) / len(counts))),

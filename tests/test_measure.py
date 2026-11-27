@@ -61,3 +61,9 @@ def test_registry_entries_are_well_formed():
         assert kind in {"tiktoken", "hf"}, name
         assert ident, name
     assert data.LANGUAGES[measure.BASELINE] == "eng_Latn"
+
+
+def test_unk_rate():
+    enc = lambda s: [0 if w == "?" else 1 for w in s.split()]
+    assert measure.unk_rate(enc, 0, ["a ? b ?"]) == 0.5
+    assert measure.unk_rate(enc, None, ["a ? b ?"]) == 0.0
