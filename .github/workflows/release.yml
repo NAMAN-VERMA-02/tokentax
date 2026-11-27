@@ -1,0 +1,19 @@
+# Publishes to PyPI when a v* tag is pushed. Uses PyPI trusted publishing:
+# add this repo + workflow as a trusted publisher on pypi.org first; no token is stored here.
+name: release
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build && python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1
