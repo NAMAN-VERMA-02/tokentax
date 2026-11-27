@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokentax: the token tax on Indian languages</title>
+<meta name="description" content="How many more tokens the same sentence costs in Hindi, Tamil, Bengali and other Indian languages than in English, across 8 LLM tokenizers.">
+<style>
+  :root {
+    --bg: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --line: #e4e3df; --accent: #2a78d6;
+    --s1: #cde2fb; --s2: #9ec5f4; --s3: #6da7ec; --s4: #3987e5; --s5: #256abf; --s6: #184f95; --s7: #0d366b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --line: #383835; --accent: #3987e5; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 40px 20px 64px; }
+  h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 18px; margin: 40px 0 8px; }
+  p.lede { color: var(--ink2); margin: 0 0 24px; max-width: 70ch; }
+  a { color: var(--accent); }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 12px; }
+  .controls button { font: inherit; padding: 6px 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 6px; cursor: pointer; }
+  .controls button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  .wrap { overflow-x: auto; }
+  table { border-collapse: separate; border-spacing: 2px; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 10px; text-align: center; white-space: nowrap; border-radius: 4px; }
+  th { font-weight: 600; color: var(--ink2); font-size: 13px; cursor: pointer; user-select: none; }
+  th:first-child, td:first-child { text-align: left; color: var(--ink); }
+  th.sorted { color: var(--accent); }
+  td.cell { color: #0b0b0b; }
+  td.dark { color: #fff; }
+  td.lossy { outline: 2px dashed var(--ink2); outline-offset: -3px; }
+  .note { color: var(--ink2); font-size: 13px; margin-top: 8px; }
+  textarea { width: 100%; min-height: 90px; font: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--ink); }
+  .stats { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 10px; }
+  .stat b { display: block; font-size: 22px; }
+  .stat span { color: var(--ink2); font-size: 13px; }
+  pre { background: color-mix(in srgb, var(--line) 50%, transparent); padding: 12px; border-radius: 6px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>The token tax on Indian languages</h1>
+  <p class="lede">The same sentence, translated by humans into 16 languages (FLORES-200, 1012 sentences), counted by 8 real LLM tokenizers.
+    A tax of <b>3.0</b> means you pay 3&times; the tokens of English: 3&times; the API bill, 3&times; slower output, a third of the context window.
+    Click a column to sort. <a href="https://github.com/NAMAN-VERMA-02/tokentax">Code and method on GitHub</a>.</p>
+
+  <div class="controls" role="group" aria-label="Metric">
+    <button data-metric="tax" aria-pressed="true">Token tax vs English</button>
+    <button data-metric="sentences_in_128k" aria-pressed="false">Sentences that fit in 128k tokens</button>
+    <button data-metric="chars_per_token" aria-pressed="false">Characters per token</button>
+  </div>
+  <div class="wrap"><table id="grid" aria-describedby="gridnote"></table></div>
+  <p class="note" id="gridnote">Dashed cell = over 5% of tokens were [UNK]: the tokenizer dropped that text, so its low count is not a saving. Hover a cell for the 95% bootstrap interval.</p>
+
+  <h2>Your own text</h2>
+  <p class="note">This box counts characters and UTF-8 bytes in your browser. Real token counts need the tokenizers, so run the CLI:</p>
+  <pre>pip install git+https://github.com/NAMAN-VERMA-02/tokentax
+tokentax "मेरा नाम नमन है" --vs "my name is naman"</pre>
+  <textarea id="txt" aria-label="Text to measure">मेरा नाम नमन है और मैं दिल्ली में रहता हूँ।</textarea>
+  <div class="stats" aria-live="polite">
+    <div class="stat"><b id="c">0</b><span>characters</span></div>
+    <div class="stat"><b id="b">0</b><span>UTF-8 bytes</span></div>
+    <div class="stat"><b id="bpc">0</b><span>bytes per character (English is 1.0)</span></div>
+  </div>
+</main>
+<script>
+const STEPS = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7"].map(v => getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+let data, metric = "tax", sortCol = null, sortDesc = false;
+
+function color(v, lo, hi, invert) {
+  // log scale, like the PNG heatmap
+  let t = (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo));
+  if (invert) t = 1 - t;
+  const i = Math.max(0, Math.min(STEPS.length - 1, Math.round(t * (STEPS.length - 1))));
+  return [STEPS[i], i >= 4];
+}
+
+function render() {
+  const rows = data.rows;
+  const toks = [...new Set(rows.map(r => r.tokenizer))];
+  const langs = [...new Set(rows.map(r => r.language))];
+  const at = {}; rows.forEach(r => at[r.language + "|" + r.tokenizer] = r);
+  const vals = rows.map(r => r[metric]);
+  const lo = Math.max(Math.min(...vals), 0.01), hi = Math.max(...vals);
+  const invert = metric !== "tax";  // more sentences / chars per token = better = lighter
+
+  if (sortCol) langs.sort((a, b) => {
+    const x = at[a + "|" + sortCol][metric], y = at[b + "|" + sortCol][metric];
+    return sortDesc ? y - x : x - y;
+  });
+
+  const fmt = v => metric === "tax" ? v.toFixed(2) : metric === "chars_per_token" ? v.toFixed(1) : v.toLocaleString();
+  let html = "<thead><tr><th scope=col>Language</th>" +
+    toks.map(t => `<th scope=col class="${t === sortCol ? "sorted" : ""}" data-col="${t}">${t}</th>`).join("") + "</tr></thead><tbody>";
+  for (const l of langs) {
+    html += `<tr><td>${l}</td>`;
+    for (const t of toks) {
+      const r = at[l + "|" + t];
+      const [bg, dark] = color(r[metric], lo, hi, invert);
+      const lossy = r.unk_rate > data.lossy_threshold;
+      const tip = `${t}, ${l}: tax ${r.tax} (95% CI ${r.ci_low} to ${r.ci_high}), ${(r.unk_rate * 100).toFixed(1)}% [UNK]`;
+      html += `<td class="cell ${dark ? "dark" : ""} ${lossy ? "lossy" : ""}" style="background:${bg}" title="${tip}">${fmt(r[metric])}</td>`;
+    }
+    html += "</tr>";
+  }
+  document.getElementById("grid").innerHTML = html + "</tbody>";
+  document.querySelectorAll("th[data-col]").forEach(th => th.onclick = () => {
+    sortDesc = sortCol === th.dataset.col ? !sortDesc : false;
+    sortCol = th.dataset.col; render();
+  });
+}
+
+document.querySelectorAll("[data-metric]").forEach(b => b.onclick = () => {
+  metric = b.dataset.metric;
+  document.querySelectorAll("[data-metric]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+
+const txt = document.getElementById("txt");
+function count() {
+  const s = txt.value, chars = [...s].length, bytes = new TextEncoder().encode(s).length;
+  document.getElementById("c").textContent = chars;
+  document.getElementById("b").textContent = bytes;
+  document.getElementById("bpc").textContent = chars ? (bytes / chars).toFixed(2) : "0";
+}
+txt.oninput = count; count();
+
+fetch("results.json").then(r => r.json()).then(d => { data = d; render(); });
+</script>
+</body>
+</html>
