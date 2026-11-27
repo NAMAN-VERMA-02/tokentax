@@ -1,0 +1,25 @@
+name: Add a tokenizer
+description: Suggest (or add) a tokenizer to the study
+labels: ["tokenizer"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Tokenizer / model family
+      placeholder: Mistral Nemo
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Where to load it from
+      description: tiktoken encoding name, or a Hugging Face repo with a tokenizer.json (ungated)
+      placeholder: mistralai/Mistral-Nemo-Base-2407
+    validations:
+      required: true
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to open the PR myself

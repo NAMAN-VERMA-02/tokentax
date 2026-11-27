@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use these measurements, please cite them like this."
+title: "tokentax: the token tax on Indian languages across LLM tokenizers"
+authors:
+  - family-names: Verma
+    given-names: Naman
+version: 0.1.0
+date-released: 2026-11-27
+license: MIT
+repository-code: "https://github.com/NAMAN-VERMA-02/tokentax"
+url: "https://naman-verma-02.github.io/tokentax/"
+keywords:
+  - tokenization
+  - multilingual
+  - indic languages
+  - large language models

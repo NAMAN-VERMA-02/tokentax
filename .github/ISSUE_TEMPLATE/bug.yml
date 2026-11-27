@@ -1,0 +1,16 @@
+name: Bug or wrong number
+description: Something crashes, or a number doesn't match what you measured
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Command you ran, what you expected, what you got
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Python version and OS
+      placeholder: 3.12, Ubuntu 24.04

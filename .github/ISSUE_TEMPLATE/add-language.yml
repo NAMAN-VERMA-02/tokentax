@@ -1,0 +1,22 @@
+name: Add a language
+description: Measure another language from FLORES-200
+labels: ["language"]
+body:
+  - type: input
+    id: lang
+    attributes:
+      label: Language and FLORES-200 code
+      placeholder: Nepali, npi_Deva
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it's interesting
+      description: e.g. shares a script with another language in the study, large speaker count, unusual script
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to open the PR myself
