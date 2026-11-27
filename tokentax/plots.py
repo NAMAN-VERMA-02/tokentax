@@ -84,11 +84,28 @@ def export_json(df: pd.DataFrame, out: Path):
                    encoding="utf-8")
 
 
+SAMPLE = 29  # "The find also grants insight into the evolution of feathers in birds."
+
+
+def export_sample(out: Path, index: int = SAMPLE):
+    """One real FLORES sentence in every language with its exact token ids, so the site draws true counts."""
+    from . import data, tokenizers
+
+    langs = {lang: data.load(code)[index] for lang, code in data.LANGUAGES.items()}
+    counts = {}
+    for tname in tokenizers.TOKENIZERS:
+        tok = tokenizers.get(tname)
+        counts[tname] = {lang: [int(i == tok.unk_id) for i in tok.encode(text)] for lang, text in langs.items()}
+    out.write_text(json.dumps({"index": index, "text": langs, "unk_flags": counts}, ensure_ascii=False),
+                   encoding="utf-8")
+
+
 def main(csv=Path("results/results.csv")):
     df = pd.read_csv(csv)
     heatmap(df, csv.parent / "heatmap.png")
     bars(df, csv.parent / "by_tokenizer.png")
     export_json(df, Path("docs/results.json"))
+    export_sample(Path("docs/sample.json"))
 
 
 if __name__ == "__main__":
