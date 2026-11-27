@@ -102,6 +102,8 @@ Then `tokentax bench` and open a PR with the new CSV. See [CONTRIBUTING.md](CONT
 
 Petrov et al., *Language Model Tokenizers Introduce Unfairness Between Languages* (NeurIPS 2023), measured this effect across many languages for older tokenizers. tokentax focuses on Indian languages. It adds the tokenizers released after that paper (GPT-4o, Llama 3, Gemma 2, Qwen 2.5, DeepSeek-V3, Sarvam-1), a romanized-script comparison and a lost-text (`[UNK]`) check.
 
+[Shreyaskc/token-tax](https://github.com/Shreyaskc/token-tax) is a separate project that measures the same kind of tokenizer cost penalty across 100+ languages; it already uses the `tokentax` name on PyPI, so this package is published as `trailtax`.
+
 ## Data and license
 
 Code: MIT. FLORES-200 is © Meta, CC BY-SA 4.0; it is downloaded at run time and not stored in this repo. `results/` contains only derived counts. To cite this project, see [CITATION.cff](CITATION.cff).

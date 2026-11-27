@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tokentax"
+name = "trailtax"
 version = "0.1.0"
 description = "How many more tokens do Indian languages cost than English? Measured across real LLM tokenizers on FLORES-200."
 readme = "README.md"
