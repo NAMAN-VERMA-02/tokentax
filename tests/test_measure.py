@@ -67,3 +67,12 @@ def test_unk_rate():
     enc = lambda s: [0 if w == "?" else 1 for w in s.split()]
     assert measure.unk_rate(enc, 0, ["a ? b ?"]) == 0.5
     assert measure.unk_rate(enc, None, ["a ? b ?"]) == 0.0
+
+
+def test_cli_resolves_fragments():
+    from tokentax.cli import resolve
+
+    assert resolve("sarvam") == "Sarvam-1"
+    assert resolve("GPT-4o (o200k)") == "GPT-4o (o200k)"
+    with pytest.raises(SystemExit):
+        resolve("gpt")  # ambiguous: GPT-4 and GPT-4o
