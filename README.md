@@ -4,7 +4,9 @@
 
 More tokens means a bigger API bill, slower generation and a smaller usable context window, for the same meaning.
 
-**[Interactive table →](https://naman-verma-02.github.io/tokentax/)**
+**[Open the interactive site →](https://naman-verma-02.github.io/tokentax/)**
+
+[![The tokentax site: one sentence drawn as one dot per token, 13 in English and 215 in Odia on GPT-4's tokenizer](docs/img/hero.png)](https://naman-verma-02.github.io/tokentax/)
 
 ![token tax heatmap](results/heatmap.png)
 
