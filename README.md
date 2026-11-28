@@ -47,6 +47,13 @@ mBERT                6     4  1.50x
 
 Use `-t sarvam,gpt-4o` to pick tokenizers by any unique part of their name. `tokentax bench` reruns the full study and redraws the charts. Only tokenizer files are downloaded (a few MB each), never model weights, so it runs on any laptop CPU in a couple of minutes.
 
+For longer text, read from UTF-8 files or pipe UTF-8 text to stdin:
+
+```bash
+tokentax -f article_ta.txt --vs-file article_en.txt
+cat article_ta.txt | tokentax -
+```
+
 ## How it works
 
 ```

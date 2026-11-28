@@ -28,6 +28,15 @@ def count(text: str, vs: str | None, names: list[str]) -> list[tuple[str, int, i
     return out
 
 
+def read_file(path: Path, parser: argparse.ArgumentParser) -> str:
+    try:
+        # Keep line endings intact because they can affect token counts.
+        with path.open(encoding="utf-8", newline="") as source:
+            return source.read()
+    except (OSError, UnicodeError) as exc:
+        parser.error(f"could not read {path} as UTF-8: {exc}")
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if argv[:1] == ["bench"]:
@@ -40,15 +49,31 @@ def main(argv=None):
         return
 
     p = argparse.ArgumentParser(prog="tokentax", description="Count tokens for your text across LLM tokenizers.")
-    p.add_argument("text")
-    p.add_argument("--vs", help="the same text in another language (e.g. English) to get the tax")
+    original = p.add_mutually_exclusive_group(required=True)
+    original.add_argument("text", nargs="?", help="literal text, or '-' to read UTF-8 from stdin")
+    original.add_argument("-f", "--file", type=Path, help="read the text from a UTF-8 file")
+    comparison = p.add_mutually_exclusive_group()
+    comparison.add_argument("--vs", help="the same text in another language (e.g. English) to get the tax")
+    comparison.add_argument("--vs-file", type=Path, help="read the comparison text from a UTF-8 file")
     p.add_argument("-t", "--tokenizers", help="comma-separated names or fragments (default: all)")
     a = p.parse_args(argv)
     names = [resolve(q.strip()) for q in a.tokenizers.split(",")] if a.tokenizers else list(tokenizers.TOKENIZERS)
 
+    text = a.text
+    if a.file is not None:
+        text = read_file(a.file, p)
+    elif text == "-":
+        try:
+            # Decode piped bytes independently of the terminal's locale.
+            stream = getattr(sys.stdin, "buffer", None)
+            text = stream.read().decode("utf-8") if stream is not None else sys.stdin.read()
+        except (OSError, UnicodeError) as exc:
+            p.error(f"could not read stdin as UTF-8: {exc}")
+    vs = read_file(a.vs_file, p) if a.vs_file is not None else a.vs
+
     width = max(map(len, names))
-    print(f"{'tokenizer':<{width}}  tokens" + ("  vs   tax" if a.vs else ""))
-    for name, n, m in count(a.text, a.vs, names):
+    print(f"{'tokenizer':<{width}}  tokens" + ("  vs   tax" if vs else ""))
+    for name, n, m in count(text, vs, names):
         line = f"{name:<{width}}  {n:>6}"
         if m is not None:
             line += f"  {m:>4}  {n / m:.2f}x" if m else f"  {m:>4}     -"
