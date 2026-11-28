@@ -4,6 +4,7 @@ tokentax bench          # rerun the full FLORES study + charts
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -24,7 +25,7 @@ def count(text: str, vs: str | None, names: list[str]) -> list[tuple[str, int, i
     out = []
     for name in names:
         tok = tokenizers.get(name)
-        out.append((name, len(tok.encode(text)), len(tok.encode(vs)) if vs else None))
+        out.append((name, len(tok.encode(text)), len(tok.encode(vs)) if vs is not None else None))
     return out
 
 
@@ -42,13 +43,21 @@ def main(argv=None):
     p = argparse.ArgumentParser(prog="tokentax", description="Count tokens for your text across LLM tokenizers.")
     p.add_argument("text")
     p.add_argument("--vs", help="the same text in another language (e.g. English) to get the tax")
+    p.add_argument("--json", action="store_true", help="print token counts as JSON")
     p.add_argument("-t", "--tokenizers", help="comma-separated names or fragments (default: all)")
     a = p.parse_args(argv)
     names = [resolve(q.strip()) for q in a.tokenizers.split(",")] if a.tokenizers else list(tokenizers.TOKENIZERS)
+    rows = count(a.text, a.vs, names)
+    if a.json:
+        print(json.dumps([
+            {"tokenizer": name, "tokens": n, "vs_tokens": m, "tax": n / m if m else None}
+            for name, n, m in rows
+        ]))
+        return
 
     width = max(map(len, names))
-    print(f"{'tokenizer':<{width}}  tokens" + ("  vs   tax" if a.vs else ""))
-    for name, n, m in count(a.text, a.vs, names):
+    print(f"{'tokenizer':<{width}}  tokens" + ("  vs   tax" if a.vs is not None else ""))
+    for name, n, m in rows:
         line = f"{name:<{width}}  {n:>6}"
         if m is not None:
             line += f"  {m:>4}  {n / m:.2f}x" if m else f"  {m:>4}     -"

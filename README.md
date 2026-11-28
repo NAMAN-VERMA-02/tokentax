@@ -45,7 +45,9 @@ Sarvam-1             5     6  0.83x
 mBERT                6     4  1.50x
 ```
 
-Use `-t sarvam,gpt-4o` to pick tokenizers by any unique part of their name. `tokentax bench` reruns the full study and redraws the charts. Only tokenizer files are downloaded (a few MB each), never model weights, so it runs on any laptop CPU in a couple of minutes.
+Use `-t sarvam,gpt-4o` to pick tokenizers by any unique part of their name. Add `--json` to get an array with one object per tokenizer. Without `--vs`, both `vs_tokens` and `tax` are `null`. A zero-token comparison also gives a `null` tax.
+
+`tokentax bench` reruns the full study and redraws the charts. Only tokenizer files are downloaded (a few MB each), never model weights, so it runs on any laptop CPU in a couple of minutes.
 
 ## How it works
 
