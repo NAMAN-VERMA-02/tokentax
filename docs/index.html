@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>tokentax · the token tax on Indian languages</title>
-<meta name="description" content="One sentence, drawn one dot per token: how many more tokens Hindi, Tamil, Odia and 12 other languages cost than English, across 8 LLM tokenizers.">
+<meta name="description" content="One sentence, drawn one dot per token: how many more tokens Hindi, Tamil, Odia and 12 other languages cost than English, across 10 LLM tokenizers.">
 <meta name="theme-color" content="#0e1130">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -451,7 +451,7 @@ function renderTable() {
     sortCol = b.dataset.col; renderTable();
     $(`#grid thead button[data-col="${CSS.escape(sortCol)}"]`).focus();
   });
-  const words = { tax: ["1× English", "12× English"], sentences_in_128k: ["fewer sentences fit", "more fit"], chars_per_token: ["fewer characters per token", "more"] }[metric];
+  const words = { tax: [`${lo.toFixed(1)}× English`, `${hi.toFixed(1)}× English`], sentences_in_128k: ["fewer sentences fit", "more fit"], chars_per_token: ["fewer characters per token", "more"] }[metric];
   $("#scale").innerHTML = `<span>${words[0]}</span>` + [0, 3, 6, 9, 12].map(i => `<i style="background:${invert ? BLUES[12 - i] : BLUES[i]}"></i>`).join("") + `<span>${words[1]}</span><span style="margin-left:18px"><i class="lostkey"></i></span><span>text lost to [UNK]</span>`;
 }
 document.querySelectorAll("[data-metric]").forEach(b => b.onclick = () => {

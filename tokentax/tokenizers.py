@@ -12,6 +12,8 @@ TOKENIZERS = {
     "Gemma 2": ("hf", "unsloth/gemma-2-2b"),
     "Qwen 2.5": ("hf", "Qwen/Qwen2.5-7B"),
     "DeepSeek-V3": ("hf", "deepseek-ai/DeepSeek-V3"),
+    "Mistral Nemo": ("hf", "mistralai/Mistral-Nemo-Base-2407"),
+    "Phi-4": ("hf", "microsoft/phi-4"),
     "Sarvam-1": ("hf", "sarvamai/sarvam-1"),
     "mBERT": ("hf", "bert-base-multilingual-cased"),
 }

@@ -1,6 +1,6 @@
 # tokentax
 
-**The same sentence costs up to 12× more tokens in an Indian language than in English.** tokentax measures this "token tax" for 15 languages across 8 real LLM tokenizers. It uses FLORES-200, where every sentence is a human translation of the same English text.
+**The same content can take nearly 13× as many tokens in an Indian language as in English.** tokentax measures this "token tax" for 15 languages across 10 real LLM tokenizers. It uses FLORES-200, where every sentence is a human translation of the same English text.
 
 More tokens means a bigger API bill, slower generation and a smaller usable context window, for the same meaning.
 
@@ -16,15 +16,15 @@ All numbers come from [`results/results.csv`](results/results.csv) (FLORES-200 `
 
 1. **The GPT-4 → GPT-4o tokenizer change was a big price cut for India.** Hindi went from 4.76× English (cl100k) to 1.57× (o200k). Tamil went from 7.64× to 1.98×. In a 128k context, GPT-4's tokenizer fits 623 Tamil sentences; GPT-4o's fits 2,434.
 2. **Llama 3 helped Hindi and no other Indian language.** Llama 3 took GPT-4's vocabulary and added 28k tokens. Hindi dropped from 4.76× to 2.52× and Marathi from 5.06× to 2.80×, since both use the same Devanagari script. Tamil (7.65×), Telugu (8.29×) and Kannada (8.86×) did not change at all.
-3. **Odia is the most expensive language almost everywhere.** It costs 12.4× on GPT-4, 12.2× on Llama 3 and 9.7× on Qwen 2.5. Only Sarvam-1 (1.46×) prices it like the other Indian languages.
+3. **Odia is the most expensive language almost everywhere.** It costs 12.9× on Mistral Nemo, 12.4× on Phi-4 and GPT-4, 12.2× on Llama 3 and 9.7× on Qwen 2.5. Only Sarvam-1 (1.46×) prices it like the other Indian languages.
 4. **An Indic-trained tokenizer wins on its own languages and loses everywhere else.** Sarvam-1 averages 1.24× on the 10 Indian languages it was built for (never above 1.47×). It charges 7.39× on Urdu and 2.92× on Assamese (neither is in its supported list), 3.82× on Chinese, and its English also takes 17% more tokens than GPT-4o's. A low *tax* alone does not mean a cheap tokenizer.
-5. **Bigger vocabulary ≠ fairer.** Across tokenizers, vocabulary size and average Indic tax have a Spearman correlation of 0.07. What matters is which languages the vocabulary was trained on, not how big it is.
+5. **Bigger vocabulary ≠ fairer.** Across tokenizers, vocabulary size and average Indic tax have a Spearman correlation of −0.15. What matters is which languages the vocabulary was trained on, not how big it is.
 6. **Romanized Hindi costs about 2× on every tokenizer (1.88–2.30).** For old tokenizers this is cheaper than Devanagari (GPT-4: 2.13× vs 4.76×). For GPT-4o and Sarvam-1 it is more expensive than the native script. Typing Hinglish only saves money on tokenizers that never learned Devanagari.
 7. **A "cheap" result can be lost text.** mBERT scores Odia at 0.78×, cheaper than English, because 86% of its Odia tokens are `[UNK]`: the text was thrown away. tokentax tracks the `[UNK]` rate for every cell and flags this (dashed cells, `*` in the chart).
 
 ![average tax per tokenizer](results/by_tokenizer.png)
 
-Every tax has a 95% bootstrap interval (resampling sentences, 1000 draws); the widest interval in the whole table is ±0.15. The differences above are far bigger than the noise.
+Every tax has a 95% bootstrap interval (resampling sentences, 1000 draws); the widest interval in the whole table spans 0.34×. The differences above are far bigger than the noise.
 
 ## Try it on your own text
 
@@ -41,6 +41,8 @@ Llama 3              9     5  1.80x
 Gemma 2              6     4  1.50x
 Qwen 2.5            15     5  3.00x
 DeepSeek-V3         10     5  2.00x
+Mistral Nemo         6     5  1.20x
+Phi-4               15     5  3.00x
 Sarvam-1             5     6  0.83x
 mBERT                6     4  1.50x
 ```
